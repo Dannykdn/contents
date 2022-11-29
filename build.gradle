@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(':mylo-process-rest')
+    implementation project(':mylo-common-core')
+    implementation project(':mylo-common-util')
+    implementation project(':mylo-domain-common')
+
+}
+
+sourceSets.main.resources {
+    srcDir 'src/main/java'
+    filter.include('com/mylo/domain/**/*.xml')
+}

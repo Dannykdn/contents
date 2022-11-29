@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mylo.domain.contents.repository.ContentsMapper">
+
+    <select id="selectContents" resultType="java.util.Map">
+        SELECT  idx
+                , co_url as contentsUrl
+        FROM    cv_contents
+        WHERE   idx = #{idx}
+    </select>
+
+    <insert id="insertContents">
+        INSERT INTO cv_contents(
+            co_url
+        )
+        VALUES (
+            #{url}
+        )
+    </insert>
+
+    <select id="selectContentsList" resultType="com.mylo.domain.contents.model.Contents" parameterType="java.util.Map">
+        SELECT  idx
+                , co_url as contentsUrl
+        FROM    cv_contents
+        <where>
+            <if test="idx != null and idx != 0">
+                AND idx = #{idx}
+            </if>
+        </where>
+    </select>
+
+    <select id="getTotalContentsCnt" resultType="int">
+        SELECT  COUNT(*)
+        FROM    cv_contents
+    </select>
+
+    <insert id="insertContentsMeta" parameterType="com.mylo.domain.contents.model.ContentsMeta">
+        INSERT INTO cv_contents_meta(
+            co_json
+            , cv_type_idx
+            , co_idx
+            , reg_date
+        )
+        VALUES (
+            #{metaJson}
+            , #{typeIdx}
+            , #{contentsIdx}
+            , CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <select id="selectContentsMeta" resultType="java.util.Map">
+        SELECT  idx
+                , co_json as metaJson
+                , cv_type_idx as typeIdx
+                , co_idx as contentsIdx
+                , reg_date as regDate
+                , update_date as updateDate
+        FROM    cv_contents_meta
+        WHERE   co_idx = #{contentsIdx}
+    </select>
+
+    <select id="selectContentsMetaList" resultType="java.util.Map">
+        SELECT  idx
+                , co_json as metaJson
+                , cv_type_idx as typeIdx
+                , co_idx as contentsIdx
+                , reg_date as regDate
+                , update_date as updateDate
+        FROM    cv_contents_meta
+        <where>
+            <if test="contentsIdx != null and contentsIdx != 0">
+                AND co_idx = #{contentsIdx}
+            </if>
+            <if test="item != null and item != '' and value != null and value != ''">
+                AND #{value} MEMBER OF(co_json -> #{item})
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteContentsMeta">
+        DELETE
+        FROM   cv_contents_meta
+        <where>
+            <if test="contentsIdx != null and contentsIdx != 0">
+                AND co_idx = #{contentsIdx}
+            </if>
+        </where>
+    </delete>
+
+    <update id="updateContentsMeta">
+        UPDATE  cv_contents_meta
+        SET     co_json = #{metaJson}
+                , update_date = CURRENT_TIMESTAMP
+        WHERE   co_idx = #{contentsIdx}
+    </update>
+
+    <select id="existMeta" resultType="int">
+        SELECT COUNT(*)
+        FROM   cv_contents_meta
+        WHERE  co_idx = #{contentsIdx}
+    </select>
+
+    <select id="existFile" resultType="int">
+        SELECT COUNT(*)
+        FROM   cv_contents
+        WHERE  idx = #{contentsIdx}
+    </select>
+</mapper>

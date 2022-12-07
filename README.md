@@ -1,35 +1,34 @@
 # CONTENTS 타입에 따른 메타 처리
 
-## ContentsBO / ContentsMapper / ContentsDAOMapper
+## ContentsBO &rarr; ContentsMapper / ContentsDAOMapper
 
-### FILE
-- **selectContents()**
+- **getContents()** &rarr; selectContents()
   - 기능 : 파일 상세조회
   - 필수 : (Integer) idx
-- **selectContentsList()**
+- **getContentsList()** &rarr; selectContentsList()
   - 기능 : 파일 리스트 조회
   - 선택 : (Integer) idx
 - **uploadContents()**
   - 기능 : 파일 업로드
   - 필수 : (formData) file
-- **insertContents() / ContentsBO**
+- **insertContents()** &rarr; insertContents()
   - 기능 : 파일 저장 위치를 DB에 저장
   - 필수 : (String) url
 
-### META
-- selectContentsMeta()
+## ContentsMetaBO &rarr; ContentsMapper / ContentsDAOMapper
+- **getContentsMeta()** &rarr; selectContentsMeta() 
   - 기능 : 메타데이터 상세조회
   - 필수 : (Integer) idx
-- selectContentsMetaList()
+- **getContentsMetaList()** &rarr; selectContentsMetaList()
   - 기능 : 메타데이터 리스트 조회
   - 선택 : (Integer) idx / (String) item,value
-- insertContentsMeta()
+- **insertContentsMeta()** &rarr; insertContentsMeta()
   - 기능 : 메타데이터 삽입
   - 필수 : (ContentsMeta) meta
-- updateContentsMeta()
+- **updateContentsMeta()** &rarr; updateContentsMeta()
   - 기능 : 메타데이터 수정
   - 필수 : (ContentsMeta) meta
-- deleteContentsMeta()
+- **deleteContentsMeta()** &rarr; deleteContentsMeta()
   - 기능 : 메타데이터 삭제
   - 필수 : (Integer) idx
 

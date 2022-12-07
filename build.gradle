@@ -3,7 +3,7 @@ dependencies {
     implementation project(':mylo-common-core')
     implementation project(':mylo-common-util')
     implementation project(':mylo-domain-common')
-
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 }
 
 sourceSets.main.resources {

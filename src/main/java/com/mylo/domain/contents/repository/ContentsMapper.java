@@ -21,7 +21,7 @@ public interface ContentsMapper {
 
     Map<String, Object> selectContentsMeta(Integer contentsIdx);
 
-    List<Map<String, Object>> selectContentsMetaList(Integer contentsIdx, String item, String value);
+    List<Map<String, Object>> selectContentsMetaList(Map<String, Object> search);
 
     int updateContentsMeta(ContentsMeta meta);
 

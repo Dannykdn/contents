@@ -1,8 +1,6 @@
 package com.mylo.spring.service.contents;
 
-import com.mylo.common.core.util.JsonUtils;
 import com.mylo.domain.contents.model.Contents;
-import com.mylo.domain.contents.model.ContentsMeta;
 import com.mylo.domain.contents.repository.ContentsMapper;
 import com.mylo.spring.service.contents.validate.ContentsValidate;
 import com.mylo.util.aws.DefaultMyloFileUtils;
@@ -27,6 +25,15 @@ public class ContentsBO {
     @Autowired ContentsValidate contentsValidate;
 
     private final MyloFileUtils myloFileUtils = DefaultMyloFileUtils.getInstance();
+
+    /**
+     * Contents 파일 업로드 메소드
+     * 파일 업로드 실패 -> 에러
+     * 파일 업로드 성공 -> DB insert 실패 -> 파일 삭제 및 에러
+     * 파일 업로드 성공 -> DB insert 성공 -> true 반환
+     * @param file
+     * @return boolean
+     */
     public boolean uploadContents(MultipartFile file) {
         String url = "";
 
@@ -50,6 +57,11 @@ public class ContentsBO {
         return true;
     }
 
+    /**
+     * 파일 업로드 성공 시 저장위치(url)를 받아서 DB에 insert하는 메소드
+     * @param url
+     * @return boolean
+     */
     public boolean insertContents(String url) {
         int result = contentsMapper.insertContents(url);
         if(!(result == 1)){
@@ -59,92 +71,29 @@ public class ContentsBO {
         return true;
     }
 
-    public Map<String, Object> selectContents(Integer idx) {
+    /**
+     * idx로 url 조회
+     * idx 유효성 검사 후 select 결과를 Map형식으로 반환
+     * @param idx
+     * @return Map
+     */
+    public Map<String, Object> getContents(Integer idx) {
         // param 유효성 확인
         contentsValidate.paramValidation(idx);
         return contentsMapper.selectContents(idx);
     }
 
-    public Map<String, Object> selectContentsList(Integer idx) {
+    /**
+     * 전체 리스트 조회 또는 idx로 조회
+     * select 결과를 Map형식으로 반환
+     * @param idx
+     * @return Map
+     */
+    public Map<String, Object> getContentsList(Integer idx) {
         Map<String, Object> resultMap = new HashMap<>();
         List<Contents> sampleList = contentsMapper.selectContentsList(idx);
         resultMap.put("itemList", sampleList);
 
         return resultMap;
-    }
-
-    public boolean insertContentsMeta(ContentsMeta meta) {
-        // param 유효성 확인
-        contentsValidate.paramValidation(meta.getContentsIdx(), meta.getMetaJson());
-        // contentsIdx가 DB에 있을 경우
-        contentsValidate.existMeta(meta.getContentsIdx(), 1);
-        contentsValidate.existFile(meta.getContentsIdx());
-
-        // 입력 받은 metaJson을 json형식으로 바꾼 후 meta에 set
-        meta.setMetaJson(JsonUtils.toJson(meta.getMetaJson()));
-        int result = contentsMapper.insertContentsMeta(meta);
-
-        if(!(result == 1)){ // DB insert 성공 여부
-            contentsValidate.insertFail();
-            return false;
-        }
-        return true;
-    }
-
-    public Map<String, Object> selectContentsMeta(Integer contentsIdx) {
-        // param 유효성 확인
-        contentsValidate.paramValidation(contentsIdx);
-        Map<String, Object> result = contentsMapper.selectContentsMeta(contentsIdx);
-        if(result != null) {
-            result.put("metaJson", JsonUtils.toMap((String) result.get("metaJson")));
-        }
-
-        return result;
-    }
-
-    public Map<String, Object> selectContentsMetaList(Integer contentsIdx, String item, String value) {
-        Map<String, Object> resultMap = new HashMap<>();
-
-        // 쿼리에서 검색 항목 지정을 위해 item에 '$.'을 추가('${}' 대신 '#{}'을 사용하기 위함)
-        item = "$." + item;
-        List<Map<String, Object>> sampleList = contentsMapper.selectContentsMetaList(contentsIdx, item, value);
-        for (Map<String, Object> o : sampleList) {
-            o.put("metaJson", JsonUtils.toMap((String) o.get("metaJson")));
-        }
-        resultMap.put("itemList", sampleList);
-
-        return resultMap;
-    }
-
-    public boolean updateContentsMeta(ContentsMeta meta) {
-        // param 유효성 확인
-        contentsValidate.paramValidation(meta.getContentsIdx(), meta.getMetaJson());
-        // contentsIdx가 DB에 없을 경우
-        contentsValidate.existMeta(meta.getContentsIdx(), 0);
-
-        // 입력 받은 metaJson을 json형식으로 바꾼 후 meta에 set
-        meta.setMetaJson(JsonUtils.toJson(meta.getMetaJson()));
-        int result = contentsMapper.updateContentsMeta(meta);
-
-        if(!(result == 1)){ // DB update 성공 여부
-            contentsValidate.updateFail();
-            return false;
-        }
-        return true;
-    }
-
-    public boolean deleteContentsMeta(Integer contentsIdx) {
-        // param 유효성 확인
-        contentsValidate.paramValidation(contentsIdx);
-        // contentsIdx가 DB에 없을 경우
-        contentsValidate.existMeta(contentsIdx, 0);
-
-        int result = contentsMapper.deleteContentsMeta(contentsIdx);
-
-        if(!(result == 1)){ // DB delete 성공 여부
-            contentsValidate.deleteFail();
-            return false;
-        }
-        return true;
     }
 }

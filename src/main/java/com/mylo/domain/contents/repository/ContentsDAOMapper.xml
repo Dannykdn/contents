@@ -2,26 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mylo.domain.contents.repository.ContentsMapper">
 
+    <!-- idx로 cv_contents 조회 -->
     <select id="selectContents" resultType="java.util.Map">
-        SELECT  idx
-                , co_url as contentsUrl
-        FROM    cv_contents
-        WHERE   idx = #{idx}
+        SELECT idx
+        , co_url as contentsUrl
+        FROM cv_contents
+        WHERE idx = #{idx}
     </select>
 
+    <!-- url을 cv_contents 삽입 -->
     <insert id="insertContents">
         INSERT INTO cv_contents(
-            co_url
+        co_url
         )
         VALUES (
-            #{url}
+        #{url}
         )
     </insert>
 
-    <select id="selectContentsList" resultType="com.mylo.domain.contents.model.Contents" parameterType="java.util.Map">
-        SELECT  idx
-                , co_url as contentsUrl
-        FROM    cv_contents
+    <!-- cv_contents 전체 조회 혹은 idx로 부분 조회 -->
+    <select id="selectContentsList" resultType="com.mylo.domain.contents.model.Contents" parameterType="Integer">
+        SELECT idx
+        , co_url as contentsUrl
+        FROM cv_contents
         <where>
             <if test="idx != null and idx != 0">
                 AND idx = #{idx}
@@ -29,58 +32,54 @@
         </where>
     </select>
 
-    <select id="getTotalContentsCnt" resultType="int">
-        SELECT  COUNT(*)
-        FROM    cv_contents
-    </select>
-
+    <!-- ContentsMeta 객체를 받아 cv_contents_meta에 삽입-->
     <insert id="insertContentsMeta" parameterType="com.mylo.domain.contents.model.ContentsMeta">
         INSERT INTO cv_contents_meta(
-            co_json
-            , cv_type_idx
-            , co_idx
-            , reg_date
+        co_json
+        , cv_type_idx
+        , co_idx
+        , reg_date
         )
         VALUES (
-            #{metaJson}
-            , #{typeIdx}
-            , #{contentsIdx}
-            , CURRENT_TIMESTAMP
+        #{metaJson}
+        , #{typeIdx.code}
+        , #{contentsIdx}
+        , CURRENT_TIMESTAMP
         )
     </insert>
 
+    <!-- idx로 cv_contents_meta 조회 -->
     <select id="selectContentsMeta" resultType="java.util.Map">
-        SELECT  idx
-                , co_json as metaJson
-                , cv_type_idx as typeIdx
-                , co_idx as contentsIdx
-                , reg_date as regDate
-                , update_date as updateDate
-        FROM    cv_contents_meta
-        WHERE   co_idx = #{contentsIdx}
+        SELECT idx
+        , co_json as metaJson
+        , cv_type_idx as typeIdx
+        , co_idx as contentsIdx
+        , reg_date as regDate
+        , update_date as updateDate
+        FROM cv_contents_meta
+        WHERE co_idx = #{contentsIdx}
     </select>
 
-    <select id="selectContentsMetaList" resultType="java.util.Map">
-        SELECT  idx
-                , co_json as metaJson
-                , cv_type_idx as typeIdx
-                , co_idx as contentsIdx
-                , reg_date as regDate
-                , update_date as updateDate
-        FROM    cv_contents_meta
+    <!-- cv_contents_meta 전체 조회 및 contentsIdx로 부분 조회 및 item/value로 검색 조회 -->
+    <select id="selectContentsMetaList" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT idx
+        , co_json as metaJson
+        , cv_type_idx as typeIdx
+        , co_idx as contentsIdx
+        , reg_date as regDate
+        , update_date as updateDate
+        FROM cv_contents_meta
         <where>
-            <if test="contentsIdx != null and contentsIdx != 0">
-                AND co_idx = #{contentsIdx}
-            </if>
             <if test="item != null and item != '' and value != null and value != ''">
                 AND #{value} MEMBER OF(co_json -> #{item})
             </if>
         </where>
     </select>
 
+    <!-- contentsIdx로 cv_contents_meta의 row 삭제 -->
     <delete id="deleteContentsMeta">
         DELETE
-        FROM   cv_contents_meta
+        FROM cv_contents_meta
         <where>
             <if test="contentsIdx != null and contentsIdx != 0">
                 AND co_idx = #{contentsIdx}
@@ -88,22 +87,25 @@
         </where>
     </delete>
 
+    <!-- ContentsMeta로 contentsIdx에 따른 cv_contents_meta의 row를 update -->
     <update id="updateContentsMeta">
-        UPDATE  cv_contents_meta
-        SET     co_json = #{metaJson}
-                , update_date = CURRENT_TIMESTAMP
-        WHERE   co_idx = #{contentsIdx}
+        UPDATE cv_contents_meta
+        SET co_json = #{metaJson}
+        , update_date = CURRENT_TIMESTAMP
+        WHERE co_idx = #{contentsIdx}
     </update>
 
+    <!-- contentsIdx로 cv_contents_meta의 row 유무 확인 -->
     <select id="existMeta" resultType="int">
         SELECT COUNT(*)
-        FROM   cv_contents_meta
-        WHERE  co_idx = #{contentsIdx}
+        FROM cv_contents_meta
+        WHERE co_idx = #{contentsIdx}
     </select>
 
+    <!-- contentsIdx로 cv_contents의 row 유무 확인 -->
     <select id="existFile" resultType="int">
         SELECT COUNT(*)
-        FROM   cv_contents
-        WHERE  idx = #{contentsIdx}
+        FROM cv_contents
+        WHERE idx = #{contentsIdx}
     </select>
 </mapper>
